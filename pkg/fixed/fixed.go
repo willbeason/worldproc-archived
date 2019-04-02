@@ -1,0 +1,65 @@
+// Package fixed is a performant library for
+package fixed
+
+const (
+	// size16 is the number of bits past the decimal.
+	size16 = 16
+
+	// factor is the value to multiply a float by before truncating it and
+	// converting it to a F16.
+	factor = 1 << size16
+
+	// invFactorF is the inverse of the factor to divide by to get an equivalent float.
+	invFactorF = 1.0 / float64(factor)
+)
+
+const (
+	// One is the value 1 for use as a compile-time constant.
+	One = F16(1 << size16)
+
+	// remainderMask provides a convenient value to bitwise-and with to get the non-integral
+	// part of an F16.
+	remainderMask = One - 1
+)
+
+// F16 represents nonnegative integral multiples of 2^-16 from 0 to 2^48 - 2^-16.
+type F16 uint64
+
+// F32 represents nonnegative integral multiples of 2^-32 from 0 to 2^32 - 2^-32.
+type F32 uint64
+
+// Int converts an int into an F16.
+func Int(i int) F16 {
+	return F16(i << size16)
+}
+
+// Times multiplies two F16s together, returning an F32.
+// This eliminates unnecessary bit-shifting on intermediate values.
+func (f F16) Times(f2 F16) F32 {
+	return F32(f * f2)
+}
+
+// F16 returns a truncated version of the F32.
+func (f F32) F16() F16 {
+	return F16(f >> size16)
+}
+
+// Split returns the integral and non-integral parts of the F16.
+func (f F16) Split() (int, F16) {
+	return f.int(), f.Remainder()
+}
+
+// Int returns the integral part of the F16.
+func (f F16) int() int {
+	return int(f >> size16)
+}
+
+// Remainder returns the non-integral part of the F16.
+func (f F16) Remainder() F16 {
+	return f & remainderMask
+}
+
+// Float returns a floating point representation of the F16.
+func (f F16) float() float64 {
+	return float64(f) * invFactorF
+}
