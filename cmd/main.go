@@ -10,7 +10,7 @@ import (
 )
 
 func noise1() {
-	var n = noise.Value(rand.NewSource(0))
+	var n = noise.NewValue(rand.NewSource(0))
 
 	start := time.Now()
 	for x := 0; x < 1000; x++ {
@@ -23,7 +23,7 @@ func noise1() {
 }
 
 func noise10() {
-	n := noise.Value(rand.NewSource(0))
+	n := noise.NewValue(rand.NewSource(0))
 
 	start := time.Now()
 	for x := 0; x < 1000; x++ {

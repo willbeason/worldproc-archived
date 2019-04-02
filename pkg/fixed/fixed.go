@@ -1,4 +1,4 @@
-// Package fixed is a performant library for
+// Package fixed is a performant library for non-integral math with 16 or 32 bits of precision.
 package fixed
 
 const (
