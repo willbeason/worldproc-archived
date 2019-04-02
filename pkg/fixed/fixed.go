@@ -4,13 +4,6 @@ package fixed
 const (
 	// size16 is the number of bits past the decimal.
 	size16 = 16
-
-	// factor is the value to multiply a float by before truncating it and
-	// converting it to a F16.
-	factor = 1 << size16
-
-	// invFactorF is the inverse of the factor to divide by to get an equivalent float.
-	invFactorF = 1.0 / float64(factor)
 )
 
 const (
@@ -33,7 +26,7 @@ func Int(i int) F16 {
 	return F16(i << size16)
 }
 
-// Times multiplies two F16s together, returning an F32.
+// Times multiplies two F16s together exactly, returning an F32.
 // This eliminates unnecessary bit-shifting on intermediate values.
 func (f F16) Times(f2 F16) F32 {
 	return F32(f * f2)
@@ -57,9 +50,4 @@ func (f F16) int() int {
 // Remainder returns the non-integral part of the F16.
 func (f F16) Remainder() F16 {
 	return f & remainderMask
-}
-
-// Float returns a floating point representation of the F16.
-func (f F16) float() float64 {
-	return float64(f) * invFactorF
 }
