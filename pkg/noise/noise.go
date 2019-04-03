@@ -13,12 +13,16 @@ const (
 	// We have it as a compile-time constant so types can use it as array lengths.
 	size int = 1 << shift
 
-	// noiseSize2 is the canonical square of size for use in 2D noise.
-	noiseSize2 = size * size
-
 	// intMask provides a convenient integer to take a bitwise-and with in order to perform
-	// a cheap modulus.
+	// a cheap modulus with size.
 	intMask = size - 1
+
+	// size2 is the canonical square of size for use in 2D noise.
+	size2 = size * size
+
+	// int2Mask provides a convenient integer to take a bitwise-and with in order to perform
+	// a cheap modulus with size2.
+	int2Mask = size2 - 1
 )
 
 // Noise represents some form of noise to be used in generation.

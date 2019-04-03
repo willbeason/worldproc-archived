@@ -22,7 +22,7 @@ type F16 uint64
 // F32 represents nonnegative integral multiples of 2^-32 from 0 to 2^32 - 2^-32.
 type F32 uint64
 
-// Int converts an int into an F16.
+// Int converts an Int into an F16.
 func Int(i int) F16 {
 	return F16(i << size16)
 }
@@ -43,13 +43,10 @@ func (f F32) F16() F16 {
 	return F16(f >> size16)
 }
 
-// Split returns the integral and non-integral parts of the F16.
-func (f F16) Split() (int, F16) {
-	return f.int(), f.Remainder()
-}
-
-// int returns the integral part of the F16.
-func (f F16) int() int {
+// Int returns the integral part of the F16.
+//
+// Measured slower to manually inline.
+func (f F16) Int() int {
 	return int(f >> size16)
 }
 
@@ -59,6 +56,8 @@ func (f F16) Float() float64 {
 }
 
 // Remainder returns the non-integral part of the F16.
+//
+// Measured faster to store result if replacing 3 or more uses.
 func (f F16) Remainder() F16 {
 	return f & remainderMask
 }

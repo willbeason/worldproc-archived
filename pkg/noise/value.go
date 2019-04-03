@@ -10,7 +10,7 @@ import (
 //
 // src is the source of randomness to use to generate noise.
 func (v *Value) Fill(src rand.Source) {
-	for i := 0; i < noiseSize2; i++ {
+	for i := 0; i < size2; i++ {
 		v.noise[i] = fixed.F16(src.Int63()).Remainder() // 0.0 to 1.0 - 2^-16
 	}
 }
@@ -18,7 +18,7 @@ func (v *Value) Fill(src rand.Source) {
 // Value implements linearly interpolated value noise.
 type Value struct {
 	// noise is an array of the noise.
-	noise [noiseSize2]fixed.F16
+	noise [size2]fixed.F16
 }
 
 // At implements Noise.
@@ -26,30 +26,27 @@ type Value struct {
 // Guarantees monotonic behavior between integral values.
 // Guarantees behavior at (x, y) is equivalent to (x mod size, y mod size)
 func (v *Value) At(x, y fixed.F16) fixed.F32 {
-	xi, xr := x.Split()
-	xi = xi & intMask
+	// Take the modulus of the integral parts of each coordinate.
+	// Each measured faster stored rather than recomputed 4 times.
+	xi := x.Int() & intMask
+	yi := (y.Int() & intMask) << shift
 
-	yi, yr := y.Split()
-	yi = yi & intMask
-
-	yin := yi << shift
-	yip1n := inc(yi) << shift
+	// Get the value at each corner surrounding the position.
+	// The compiler optimizes away these assignments; this is for readability.
+	//
+	// The additions and bitwise-anding are offsets and moduli respectively.
+	// Measured faster inlined rather than as a function.
+	vBottomLeft := v.noise[yi+xi]
+	vBottomRight := v.noise[yi+((xi+1)&intMask)]
+	vUpperLeft := v.noise[((yi+size)&int2Mask)+xi]
+	vUpperRight := v.noise[((yi+size)&int2Mask)+((xi+1)&intMask)]
 
 	// Linearly interpolate based on the four corners of the enclosing square.
-	nbl := v.noise[yin+xi]
-	nbr := v.noise[yin+inc(xi)]
-	nul := v.noise[yip1n+xi]
-	nur := v.noise[yip1n+inc(xi)]
-
+	xr := x.Remainder()
+	yr := y.Remainder()
 	xryr := xr.Times(yr).F16()
-	return xryr.Times(nur) +
-		(yr - xryr).Times(nul) +
-		(xr - xryr).Times(nbr) +
-		(fixed.One + xryr - xr - yr).Times(nbl)
-}
-
-// inc is a convenient shorthand for adding 1 and taking the modulus by the
-// size of the noise to keep the current position in bounds.
-func inc(x int) int {
-	return (x + 1) & intMask
+	return xryr.Times(vUpperRight) +
+		(yr - xryr).Times(vUpperLeft) +
+		(xr - xryr).Times(vBottomRight) +
+		(fixed.One + xryr - xr - yr).Times(vBottomLeft)
 }
