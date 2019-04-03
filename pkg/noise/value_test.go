@@ -28,7 +28,7 @@ func p(x, y float64) pos {
 	return pos{x: fixed.Float(x), y: fixed.Float(y)}
 }
 
-func TestValue_At(t *testing.T) {
+func TestValue_V(t *testing.T) {
 	tcs := []struct{
 		name string
 		p pos
@@ -49,12 +49,12 @@ func TestValue_At(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			n.At(tc.p.x, tc.p.y)
+			n.V(tc.p.x, tc.p.y)
 		})
 	}
 }
 
-func TestValue_At_Monotonic(t *testing.T) {
+func TestValue_V_Monotonic(t *testing.T) {
 	tcs := []struct{
 		name string
 		p1 pos
@@ -107,9 +107,9 @@ func TestValue_At_Monotonic(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			v1 := n.At(tc.p1.x, tc.p1.y)
-			v2 := n.At(tc.p2.x, tc.p2.y)
-			v3 := n.At(tc.p3.x, tc.p3.y)
+			v1 := n.V(tc.p1.x, tc.p1.y)
+			v2 := n.V(tc.p2.x, tc.p2.y)
+			v3 := n.V(tc.p3.x, tc.p3.y)
 
 			if v1 < v3 {
 				if v1 > v2 || v2 > v3 {
@@ -126,7 +126,7 @@ func TestValue_At_Monotonic(t *testing.T) {
 	}
 }
 
-func TestValue_At_Modulus(t *testing.T) {
+func TestValue_V_Modulus(t *testing.T) {
 	tcs := []struct{
 		name string
 		p1 pos
@@ -166,8 +166,8 @@ func TestValue_At_Modulus(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			v1 := n.At(tc.p1.x, tc.p1.y)
-			v2 := n.At(tc.p2.x, tc.p2.y)
+			v1 := n.V(tc.p1.x, tc.p1.y)
+			v2 := n.V(tc.p2.x, tc.p2.y)
 
 			if v1 != v2 {
 				t.Fatalf("expected equivalent values (%v:%f) and (%v:%f)",

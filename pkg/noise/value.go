@@ -23,11 +23,11 @@ type Value struct {
 	noise [size2]fixed.F16
 }
 
-// At implements Noise.
+// V implements Source.
 //
 // Guarantees monotonic behavior between integral values.
 // Guarantees behavior at (x, y) is equivalent to (x mod size, y mod size)
-func (v *Value) At(x, y fixed.F16) fixed.F32 {
+func (v *Value) V(x, y fixed.F16) fixed.F32 {
 	// Take the modulus of the integral parts of each coordinate.
 	// Each measured faster stored rather than recomputed 4 times.
 	xi := x.Int() & intMask

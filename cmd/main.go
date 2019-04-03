@@ -16,7 +16,7 @@ func noise1() {
 	start := time.Now()
 	for x := 0; x < 1000; x++ {
 		for y := 0; y < 1000; y++ {
-			n.At(fixed.Int(x), fixed.Int(y))
+			n.V(fixed.Int(x), fixed.Int(y))
 		}
 	}
 	end := time.Now()
@@ -30,16 +30,16 @@ func noise10() {
 	start := time.Now()
 	for x := 0; x < 1000; x++ {
 		for y := 0; y < 1000; y++ {
-			n.At(fixed.Int(x), fixed.Int(y))
-			n.At(fixed.Int(x), fixed.Int(y))
-			n.At(fixed.Int(x), fixed.Int(y))
-			n.At(fixed.Int(x), fixed.Int(y))
-			n.At(fixed.Int(x), fixed.Int(y))
-			n.At(fixed.Int(x), fixed.Int(y))
-			n.At(fixed.Int(x), fixed.Int(y))
-			n.At(fixed.Int(x), fixed.Int(y))
-			n.At(fixed.Int(x), fixed.Int(y))
-			n.At(fixed.Int(x), fixed.Int(y))
+			n.V(fixed.Int(x), fixed.Int(y))
+			n.V(fixed.Int(x), fixed.Int(y))
+			n.V(fixed.Int(x), fixed.Int(y))
+			n.V(fixed.Int(x), fixed.Int(y))
+			n.V(fixed.Int(x), fixed.Int(y))
+			n.V(fixed.Int(x), fixed.Int(y))
+			n.V(fixed.Int(x), fixed.Int(y))
+			n.V(fixed.Int(x), fixed.Int(y))
+			n.V(fixed.Int(x), fixed.Int(y))
+			n.V(fixed.Int(x), fixed.Int(y))
 		}
 	}
 	end := time.Now()

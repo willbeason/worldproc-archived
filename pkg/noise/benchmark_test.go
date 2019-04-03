@@ -11,8 +11,8 @@ func randP() pos {
 
 var px = randP()
 
-func BenchmarkValue_At(b *testing.B) {
+func BenchmarkValue_V(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		n.At(px.x, px.y)
+		n.V(px.x, px.y)
 	}
 }
