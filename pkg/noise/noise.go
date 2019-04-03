@@ -7,7 +7,10 @@ const (
 	// the size of noise to use. We want the noise size to be a power of 2 so that we can
 	// use bit shifts instead of multiplication and division, and bitwise operations for
 	// moduli.
-	shift uint8 = 7
+	//
+	// At 9, noise is 512x512. Higher numbers degrade performance, and all integers 1-9
+	// have indistinguishable performance.
+	shift uint8 = 9
 
 	// revShift is a compile-time constant representing the number of bits to shift y from to
 	// get it into the correct index position.
