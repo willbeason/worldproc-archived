@@ -6,6 +6,14 @@ import (
 	"willbeason/worldproc/pkg/fixed"
 )
 
+// Value implements linearly interpolated value noise.
+type Value struct {
+	// noise is an array of the underlying noise.
+	// Row (x) is the [0,size) bits of the index.
+	// Column (y) is the [size,2*size) bits of the index.
+	noise [size2]fixed.F16
+}
+
 // Fill generates the underlying noise which Value will interpolate.
 //
 // src is the source of randomness to use to generate noise.
@@ -13,14 +21,6 @@ func (v *Value) Fill(src rand.Source) {
 	for i := 0; i < size2; i++ {
 		v.noise[i] = fixed.F16(src.Int63()).Remainder() // 0.0 to 1.0 - 2^-16
 	}
-}
-
-// Value implements linearly interpolated value noise.
-type Value struct {
-	// noise is an array of the underlying noise.
-	// Row (x) is the [0,size) bits of the index.
-	// Column (y) is the [size,2*size) bits of the index.
-	noise [size2]fixed.F16
 }
 
 // V implements Source.
