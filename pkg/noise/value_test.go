@@ -6,8 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"willbeason/proctexture/pkg/noise"
-
 	"willbeason/worldproc/pkg/fixed"
 )
 
@@ -45,7 +43,7 @@ func TestValue_At(t *testing.T) {
 		},
 		{
 			name: "works at noise boundary",
-			p: pos{x: fixed.Int(noise.NoiseSize), y: fixed.Int(noise.NoiseSize)},
+			p: pos{x: fixed.Int(size), y: fixed.Int(size)},
 		},
 	}
 
