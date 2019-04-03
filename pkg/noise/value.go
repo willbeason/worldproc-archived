@@ -14,6 +14,8 @@ type Value struct {
 	noise [size2]fixed.F16
 }
 
+var _ Source = &Value{}
+
 // Fill generates the underlying noise which Value will interpolate.
 //
 // src is the source of randomness to use to generate noise.
