@@ -9,6 +9,10 @@ const (
 	// moduli.
 	shift uint8 = 7
 
+	// iShift is a compile-time constant representing the number of bits to shift y from to
+	// get it into the correct index position.
+	iShift = 16-shift
+
 	// size is the scale of noise in units (for certain implementations) before it repeats.
 	// We have it as a compile-time constant so types can use it as array lengths.
 	size int = 1 << shift
@@ -22,7 +26,7 @@ const (
 
 	// int2Mask provides a convenient integer to take a bitwise-and with in order to perform
 	// a cheap modulus with size2.
-	int2Mask = size2 - 1
+	int2Mask = size2 - 1 - intMask
 )
 
 // Noise represents some form of noise to be used in generation.

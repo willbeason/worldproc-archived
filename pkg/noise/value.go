@@ -17,7 +17,9 @@ func (v *Value) Fill(src rand.Source) {
 
 // Value implements linearly interpolated value noise.
 type Value struct {
-	// noise is an array of the noise.
+	// noise is an array of the underlying noise.
+	// Row (x) is the [0,size) bits of the index.
+	// Column (y) is the [size,2*size) bits of the index.
 	noise [size2]fixed.F16
 }
 
@@ -29,13 +31,13 @@ func (v *Value) At(x, y fixed.F16) fixed.F32 {
 	// Take the modulus of the integral parts of each coordinate.
 	// Each measured faster stored rather than recomputed 4 times.
 	xi := x.Int() & intMask
-	yi := (y.Int() & intMask) << shift
+	yi := (int(y) >> iShift) & int2Mask
 
 	// Get the value at each corner surrounding the position.
 	// The compiler optimizes away these assignments; this is for readability.
 	//
 	// The additions and bitwise-anding are offsets and moduli respectively.
-	// Measured faster inlined rather than as a function.
+	// Measured faster inlined rather than as a function or stored.
 	vBottomLeft := v.noise[yi+xi]
 	vBottomRight := v.noise[yi+((xi+1)&intMask)]
 	vUpperLeft := v.noise[((yi+size)&int2Mask)+xi]
