@@ -7,11 +7,11 @@ const (
 	// the size of noise to use. We want the noise size to be a power of 2 so that we can
 	// use bit shifts instead of multiplication and division, and bitwise operations for
 	// moduli.
-	shift = 7
+	shift uint8 = 7
 
 	// size is the scale of noise in units (for certain implementations) before it repeats.
 	// We have it as a compile-time constant so types can use it as array lengths.
-	size = 1 << shift
+	size int = 1 << shift
 
 	// noiseSize2 is the canonical square of size for use in 2D noise.
 	noiseSize2 = size * size
