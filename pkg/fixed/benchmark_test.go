@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	f1 = rand.Float64() * 100
+	f1 = rand.Float64() * 10
 	f2 = rand.Float64() * 10
 
 	f3 float64
