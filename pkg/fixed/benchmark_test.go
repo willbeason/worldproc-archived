@@ -14,18 +14,18 @@ var (
 
 	p1 = Float(rand.Float64() * 10)
 	p2 = Float(rand.Float64() * 10)
-
 	p3 F16
+
 	p4 F32
 
 	i3 int
 )
 
 func init() {
-	f3 = f3
-	p3 = p3
-	p4 = p4
-	i3 = i3
+	f1 = f3
+	p1 = p3
+	p4 = F32(p4)
+	i3 = int(i3)
 }
 
 func BenchmarkFloat_Times(b *testing.B) {
