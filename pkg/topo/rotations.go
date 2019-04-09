@@ -7,6 +7,8 @@ import (
 	"willbeason/worldproc/pkg/fixed"
 )
 
+// RandomRotations generates a random set of Rotations from the passed
+// rand.Source. Generated rotations are approximately uniformly distributed.
 func RandomRotations(src rand.Source) Rotations {
 	result := Rotations{}
 	r := rand.New(src)
@@ -18,6 +20,7 @@ func RandomRotations(src rand.Source) Rotations {
 	return result
 }
 
+// Rotations is the sine and cosine of rotations about the origin.
 type Rotations struct {
 	sin [maxDepth]fixed.F16
 	cos [maxDepth]fixed.F16
