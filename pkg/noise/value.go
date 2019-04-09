@@ -57,5 +57,5 @@ func (v *Value) V(x, y fixed.F16) fixed.F32 {
 	return xryr.Times(vUpperRight) +
 		(yr - xryr).Times(vUpperLeft) +
 		(xr - xryr).Times(vBottomRight) +
-		(fixed.One + xryr - xr - yr).Times(vBottomLeft)
+		(fixed.One16 + xryr - xr - yr).Times(vBottomLeft)
 }
