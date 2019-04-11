@@ -33,7 +33,7 @@ func (v *Value) V(x, y fixed.F16) fixed.F32 {
 	// Take the modulus of the integral parts of each coordinate.
 	// Each measured faster stored rather than recomputed 4 times.
 	xi := x.Int() & intMask
-	yi := (int(y) >> revShift) & int2Mask
+	yi := int(y >> revShift) & int2Mask
 
 	// Get the value at each corner surrounding the position.
 	// The compiler optimizes away these assignments; this is for readability.

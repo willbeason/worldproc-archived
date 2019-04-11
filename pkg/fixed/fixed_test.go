@@ -42,7 +42,7 @@ func TestF16_FloatTruncate(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		x := r.Uint64()
 
-		f16 := fixed.F16(int(x))
+		f16 := fixed.F16(x)
 		l := f16.Float64()
 
 		diff := int(uint(f16) - uint(fixed.Float(l)))

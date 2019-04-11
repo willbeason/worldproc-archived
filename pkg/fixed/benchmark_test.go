@@ -42,7 +42,7 @@ func BenchmarkF16_Times(b *testing.B) {
 
 func BenchmarkFloat_Remainder(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		f3 = f1 - float64(int(f1))
+		f3 = f1 - float64(uint(f1))
 	}
 }
 
