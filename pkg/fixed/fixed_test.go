@@ -11,10 +11,10 @@ import (
 // exponentBits is the number of bits a float64 uses to represent its exponent.
 const exponentBits = 10
 
+var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+
 func TestF16_FloatEquivalent(t *testing.T) {
 	// Tests when F16.Float64() guarantees it returns an equivalent float64.
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-
 	for i := 0; i < 100; i++ {
 		x := r.Uint64()
 		x >>= exponentBits + 1
@@ -33,7 +33,6 @@ func TestF16_FloatEquivalent(t *testing.T) {
 
 func TestF16_FloatTruncate(t *testing.T) {
 	// Tests when F16.Float64() guarantees it returns a nearly equivalent float64.
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	// Casting to a float64 loses up to 10 digits of precision.
 	// At most this round trip has a relative error of 2^-53. (63-10=53)
