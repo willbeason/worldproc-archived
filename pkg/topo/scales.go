@@ -6,16 +6,25 @@ import (
 
 // PowerScales generates a set of scales where the factor from each scale to its
 // neighbors is scale, with maxScale as the first.
-func PowerScales(maxScale, scale fixed.F16) Scales {
+func PowerScales(maxAmplitude, scale float64) Scales {
 	result := Scales{}
-	curScale := maxScale
-	result[0] = curScale
+
+	curAmplitude := maxAmplitude
+	result.amplitude[0] = fixed.Float(curAmplitude)
+	curFrequency := 1.0 / maxAmplitude
+	result.frequency[0] = fixed.Float(curFrequency)
 	for depth := 1; depth < maxDepth; depth++ {
-		curScale = curScale.Times(scale).F16()
+		curAmplitude = curAmplitude * scale
+		result.amplitude[depth] = fixed.Float(curAmplitude)
+		curFrequency = curFrequency / scale
+		result.frequency[depth] = fixed.Float(curFrequency)
 	}
 	return result
 }
 
 // Scales is a set of transformations which scale x and y centered at the
 // origin.
-type Scales [maxDepth]fixed.F16
+type Scales struct {
+	frequency [maxDepth]fixed.F16
+	amplitude [maxDepth]fixed.F16
+}

@@ -13,15 +13,11 @@ import (
 var (
 	src = rand.NewSource(time.Now().UnixNano())
 
-	scales = topo.PowerScales(fixed.Int(1000), fixed.Float(1.0 / math.Phi))
-	offsets = topo.RandomOffsets(src)
-	rotations = topo.RandomRotations(src)
-
 	t = topo.Topography{
-		Scales: scales,
-		Offsets: offsets,
-		Rotations: rotations,
-		Depth: 25,
+		Scales: topo.PowerScales(1000, 1.0 / math.Phi),
+		Offsets: topo.RandomOffsets(src),
+		Rotations: topo.RandomRotations(src),
+		Depth: 24,
 	}
 
 	p1 = fixed.Float(rand.Float64() * 100)

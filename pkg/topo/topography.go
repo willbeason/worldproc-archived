@@ -30,13 +30,13 @@ func (t *Topography) Height(x, y fixed.F16) fixed.F32 {
 	height := fixed.Zero32
 	for depth := 0; depth < t.Depth; depth++ {
 		// Scale
-		xt, yt := x.Times(t.Scales[depth]).F16(), y.Times(t.Scales[depth]).F16()
+		xt, yt := x.Times(t.Scales.frequency[depth]).F16(), y.Times(t.Scales.frequency[depth]).F16()
 		// Offset
 		xt, yt = xt + t.Offsets.x[depth], yt + t.Offsets.y[depth]
-		// Rotate
-		xt, yt = (xt.Times(t.Rotations.cos[depth]) + yt.Times(t.Rotations.sin[depth])).F16(), (yt.Times(t.Rotations.cos[depth]) - xt.Times(t.Rotations.sin[depth])).F16()
-
-		height += t.Noise.V(x, y).F16().Times(t.Scales[depth])
+		// Rotate and scale.
+		// Measured faster to inline rotation.
+		height += t.Noise.V((xt.Times(t.Rotations.cos[depth]) + yt.Times(t.Rotations.sin[depth])).F16(), (yt.Times(t.Rotations.cos[depth]) - xt.Times(t.Rotations.sin[depth])).F16()).F16().Times(t.Scales.amplitude[depth])
 	}
+
 	return height
 }

@@ -4,6 +4,7 @@ package fixed
 const (
 	// size16 is the number of bits past the decimal.
 	size16 = 16
+	size32 = 32
 
 	// Zero32 is the value 0 for use as a compile-time constant.
 	Zero32 = F32(0)
@@ -11,8 +12,11 @@ const (
 	// One16 is the value 1 for use as a compile-time constant.
 	One16 = F16(1 << size16)
 
-	floatFactor = float64(1 << size16)
-	invFloatFactor = float64(1.0 / floatFactor)
+	floatFactor16    = float64(1 << size16)
+	invFloatFactor16 = float64(1.0 / floatFactor16)
+
+	floatFactor32    = float64(1 << size32)
+	invFloatFactor32 = float64(1.0 / floatFactor32)
 
 	// remainderMask16 provides a convenient value to bitwise-and with to get the non-integral
 	// part of an F16.
@@ -35,7 +39,7 @@ func Int(i int) F16 {
 
 // Float converts a float into an F16.
 func Float(f float64) F16 {
-	return F16(int(f * floatFactor))
+	return F16(int(f * floatFactor16))
 }
 
 // Times multiplies two F16s together exactly, returning an F32.
@@ -53,7 +57,7 @@ func (f F16) Int() int {
 
 // Float returns an equivalent floating-point representation of the F16.
 func (f F16) Float() float64 {
-	return float64(f) * invFloatFactor
+	return float64(f) * invFloatFactor16
 }
 
 // Remainder returns the non-integral part of the F16.
@@ -66,4 +70,8 @@ func (f F16) Remainder() F16 {
 // F16 returns a truncated version of the F32.
 func (f F32) F16() F16 {
 	return F16(f >> size16)
+}
+
+func (f F32) Float() float64 {
+	return float64(f) * invFloatFactor32
 }
