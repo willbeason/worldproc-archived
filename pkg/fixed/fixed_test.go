@@ -36,7 +36,8 @@ func TestF16_FloatTruncate(t *testing.T) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	// Casting to a float64 loses up to 10 digits of precision.
-	// At most this round trip has a relative error of 2^-54. (64-10=54)
+	// At most this round trip has a relative error of 2^-53. (63-10=53)
+	// Worst case is 2^63+2^10-1 gets rounded to 2^63.
 	maxDiff := 1 << exponentBits
 
 	for i := 0; i < 100; i++ {
