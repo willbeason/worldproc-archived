@@ -11,6 +11,7 @@ import (
 
 	"willbeason/worldproc/pkg/fixed"
 	"willbeason/worldproc/pkg/topo"
+	"willbeason/worldproc/pkg/transforms"
 )
 
 var (
@@ -25,10 +26,10 @@ func main() {
 	src := rand.NewSource(time.Now().UnixNano())
 
 	t := topo.Topography{
-		Scales: topo.PowerScales(200, 1.0 / math.SqrtPhi),
-		Offsets: topo.RandomOffsets(src),
-		Rotations: topo.RandomRotations(src),
-		Depth: 20,
+		Scales:    transforms.PowerScales(200, 1.0 / math.SqrtPhi),
+		Offsets:   transforms.RandomOffsets(src),
+		Rotations: transforms.RandomRotations(src),
+		Depth:     20,
 	}
 	t.Noise.Fill(src)
 
@@ -37,7 +38,7 @@ func main() {
 	for x := 0; x < sz.Max.X; x++ {
 		for y := 0; y < sz.Max.Y; y++ {
 			h := t.Height(fixed.Int(x), fixed.Int(y))
-			i := uint8(h.Float() * factor)
+			i := uint8(h.Float64() * factor)
 			img.Set(x, y, color.RGBA{
 				R: i,
 				G: i,

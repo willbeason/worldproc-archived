@@ -8,16 +8,17 @@ import (
 
 	"willbeason/worldproc/pkg/fixed"
 	"willbeason/worldproc/pkg/topo"
+	"willbeason/worldproc/pkg/transforms"
 )
 
 var (
 	src = rand.NewSource(time.Now().UnixNano())
 
 	t = topo.Topography{
-		Scales: topo.PowerScales(1000, 1.0 / math.Phi),
-		Offsets: topo.RandomOffsets(src),
-		Rotations: topo.RandomRotations(src),
-		Depth: 24,
+		Scales:    transforms.PowerScales(1000, 1.0 / math.Phi),
+		Offsets:   transforms.RandomOffsets(src),
+		Rotations: transforms.RandomRotations(src),
+		Depth:     24,
 	}
 
 	p1 = fixed.Float(rand.Float64() * 100)

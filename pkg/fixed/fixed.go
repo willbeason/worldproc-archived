@@ -29,17 +29,14 @@ type F16 uint64
 // F32 represents nonnegative integral multiples of 2^-32 from 0 to 2^32 - 2^-32.
 type F32 uint64
 
-// F48 represents nonnegative integral multiples of 2^-48 from 0 to 2^16 - 2^-48.
-type F48 uint64
-
 // Int converts an Int into an F16.
 func Int(i int) F16 {
 	return F16(i << size16)
 }
 
-// Float converts a float into an F16.
+// Float truncates a float into an F16.
 func Float(f float64) F16 {
-	return F16(int(f * floatFactor16))
+	return F16(uint(f * floatFactor16))
 }
 
 // Times multiplies two F16s together exactly, returning an F32.
@@ -55,8 +52,10 @@ func (f F16) Int() int {
 	return int(f >> size16)
 }
 
-// Float returns an equivalent floating-point representation of the F16.
-func (f F16) Float() float64 {
+// Float64 returns an floating-point representation of the F16.
+//
+// Exact for 0 <= f < 2^37 - 2^-16.
+func (f F16) Float64() float64 {
 	return float64(f) * invFloatFactor16
 }
 
@@ -72,6 +71,7 @@ func (f F32) F16() F16 {
 	return F16(f >> size16)
 }
 
-func (f F32) Float() float64 {
+// Float64 returns an equivalent float64 representation of the F32.
+func (f F32) Float64() float64 {
 	return float64(f) * invFloatFactor32
 }

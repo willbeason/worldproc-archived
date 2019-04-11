@@ -21,7 +21,7 @@ type pos struct {
 }
 
 func (p pos) String() string {
-	return fmt.Sprintf("(%.2f,%.2f)", p.x.Float(), p.y.Float())
+	return fmt.Sprintf("(%.2f,%.2f)", p.x.Float64(), p.y.Float64())
 }
 
 func p(x, y float64) pos {
@@ -114,12 +114,12 @@ func TestValue_V_Monotonic(t *testing.T) {
 			if v1 < v3 {
 				if v1 > v2 || v2 > v3 {
 					t.Fatalf("behavior nonmonotonic from (%v:%f) to (%v:%f) to (%v:%f)",
-						tc.p1, v1.F16().Float(), tc.p2, v2.F16().Float(), tc.p3, v3.F16().Float())
+						tc.p1, v1.F16().Float64(), tc.p2, v2.F16().Float64(), tc.p3, v3.F16().Float64())
 				}
 			} else {
 				if v1 < v2 || v2 < v3 {
 					t.Fatalf("behavior nonmonotonic from (%v:%f) to (%v:%f) to (%v:%f)",
-						tc.p1, v1.F16().Float(), tc.p2, v2.F16().Float(), tc.p3, v3.F16().Float())
+						tc.p1, v1.F16().Float64(), tc.p2, v2.F16().Float64(), tc.p3, v3.F16().Float64())
 				}
 			}
 		})
@@ -171,7 +171,7 @@ func TestValue_V_Modulus(t *testing.T) {
 
 			if v1 != v2 {
 				t.Fatalf("expected equivalent values (%v:%f) and (%v:%f)",
-					tc.p1, v1.F16().Float(), tc.p2, v2.F16().Float())
+					tc.p1, v1.F16().Float64(), tc.p2, v2.F16().Float64())
 			}
 		})
 	}
