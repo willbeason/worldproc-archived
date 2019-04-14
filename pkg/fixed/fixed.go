@@ -6,11 +6,12 @@ const (
 	size16 = 16
 	size32 = 32
 
-	// Zero32 is the value 0 for use as a compile-time constant.
-	Zero32 = F32(0)
-
 	// One16 is the value 1 for use as a compile-time constant.
 	One16 = F16(1 << size16)
+
+	// Zero32 is the value 0 for use as a compile-time constant.
+	Zero32 = F32(0)
+	One32  = F32(1 << size32)
 
 	floatFactor16    = float64(1 << size16)
 	invFloatFactor16 = float64(1.0 / floatFactor16)
@@ -37,6 +38,10 @@ func Int(i int) F16 {
 // Float truncates a float into an F16.
 func Float(f float64) F16 {
 	return F16(uint(f * floatFactor16))
+}
+
+func (f F16) TimesInt(i int) F16 {
+	return f * F16(i)
 }
 
 // Times multiplies two F16s together exactly, returning an F32.
@@ -69,6 +74,11 @@ func (f F16) Remainder() F16 {
 // F16 returns a truncated version of the F32.
 func (f F32) F16() F16 {
 	return F16(f >> size16)
+}
+
+// Int returns the integral part of the F32.
+func (f F32) Int() int {
+	return int(f >> size32)
 }
 
 // Float64 returns an equivalent float64 representation of the F32.
