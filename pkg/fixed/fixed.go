@@ -8,6 +8,8 @@ const (
 
 	// One16 is the value 1 for use as a compile-time constant.
 	One16 = F16(1 << size16)
+	Half16 = One16 >> 1
+	Zero16 = F16(0)
 
 	// Zero32 is the value 0 for use as a compile-time constant.
 	Zero32 = F32(0)
@@ -22,6 +24,7 @@ const (
 	// remainderMask16 provides a convenient value to bitwise-and with to get the non-integral
 	// part of an F16.
 	remainderMask16 = One16 - 1
+	remainderMask32 = One32 - 1
 )
 
 // F16 represents nonnegative integral multiples of 2^-16 from 0 to 2^48 - 2^-16.
@@ -35,13 +38,34 @@ func Int(i int) F16 {
 	return F16(i << size16)
 }
 
+func Int32(i int) F32 {
+	return F32(i << size32)
+}
+
 // Float truncates a float into an F16.
 func Float(f float64) F16 {
 	return F16(uint(f * floatFactor16))
 }
 
+func Float32(f float64) F32 {
+	return F32(uint(f * floatFactor32))
+}
+
+// Invert returns the multiplicative inverse of f.
+func (f F16) Invert() F16 {
+	return One32.DividedBy(f)
+}
+
+func (f F32) TimesUint8(i uint8) F32 {
+	return f * F32(i)
+}
+
 func (f F16) TimesInt(i int) F16 {
 	return f * F16(i)
+}
+
+func (f F32) TimesInverse(f2 F16) F16 {
+	return (F16(f) * f2) >> size32
 }
 
 // Times multiplies two F16s together exactly, returning an F32.
@@ -55,6 +79,10 @@ func (f F16) Times(f2 F16) F32 {
 // Measured slower to manually inline.
 func (f F16) Int() int {
 	return int(f >> size16)
+}
+
+func (f F32) Uint8() uint8 {
+	return uint8(f >> size32)
 }
 
 // Float64 returns an floating-point representation of the F16.
@@ -84,4 +112,13 @@ func (f F32) Int() int {
 // Float64 returns an equivalent float64 representation of the F32.
 func (f F32) Float64() float64 {
 	return float64(f) * invFloatFactor32
+}
+
+// DividedBy returns the value f / f2, as an F16.
+func (f F32) DividedBy(f2 F16) F16 {
+	return F16(f) / f2
+}
+
+func (f F32) Remainder() F32 {
+	return f & remainderMask32
 }

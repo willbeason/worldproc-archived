@@ -14,7 +14,7 @@ import (
 var (
 	src = rand.NewSource(time.Now().UnixNano())
 
-	t = topo.Topography{
+	t = topo.NoiseTopography{
 		Scales:    transforms.PowerScales(1000, 1.0 / math.Phi),
 		Offsets:   transforms.RandomOffsets(src),
 		Rotations: transforms.RandomRotations(src),
@@ -34,6 +34,6 @@ func init() {
 
 func BenchmarkTopography_Height(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		p3 = t.Height(p1, p2)
+		p3 = t.HeightLinear(p1, p2)
 	}
 }

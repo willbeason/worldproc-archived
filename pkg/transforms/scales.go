@@ -23,7 +23,7 @@ type scale struct {
 func PowerScales(maxAmplitude, scale float64) Scales {
 	result := Scales{}
 
-	curAmplitude := maxAmplitude
+	curAmplitude := 1.0
 	result[0].Amplitude = fixed.Float(curAmplitude)
 	curFrequency := 1.0 / maxAmplitude
 	result[0].Frequency = fixed.Float(curFrequency)

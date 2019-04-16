@@ -2,23 +2,29 @@ package lattice
 
 import (
 	"willbeason/worldproc/pkg/fixed"
-	"willbeason/worldproc/pkg/noise"
 )
 
 type Lattice struct {
-	scale fixed.F16
+	invScale fixed.F16
 }
 
 func NewLattice(scale fixed.F16) Lattice {
-	return Lattice{scale: scale}
+	return Lattice{
+		invScale: scale.Invert(),
+	}
 }
 
-var _ noise.Source = Lattice{}
-
-// V returns fixed.One32 if the point is a lattice line, otherwise fixed.Zero32.
-func (l Lattice) V(x, y fixed.F16) fixed.F32 {
-	if ((x % l.scale) < fixed.One16) || ((y % l.scale) < fixed.One16) {
-		return fixed.One32
+// Dist returns the distance from the position to the nearest lattice edge.
+func (l Lattice) Dist(x, y int) fixed.F16 {
+	xr, yr := l.invScale.TimesInt(x).Remainder(), l.invScale.TimesInt(y).Remainder()
+	if xr > fixed.Half16 {
+		xr = fixed.One16 - xr
 	}
-	return fixed.Zero32
+	if yr > fixed.Half16 {
+		yr = fixed.One16 - yr
+	}
+	if xr < yr {
+		return xr
+	}
+	return yr
 }

@@ -49,7 +49,7 @@ func TestValue_V(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			n.V(tc.p.x, tc.p.y)
+			n.Linear(tc.p.x, tc.p.y)
 		})
 	}
 }
@@ -107,9 +107,9 @@ func TestValue_V_Monotonic(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			v1 := n.V(tc.p1.x, tc.p1.y)
-			v2 := n.V(tc.p2.x, tc.p2.y)
-			v3 := n.V(tc.p3.x, tc.p3.y)
+			v1 := n.Linear(tc.p1.x, tc.p1.y)
+			v2 := n.Linear(tc.p2.x, tc.p2.y)
+			v3 := n.Linear(tc.p3.x, tc.p3.y)
 
 			if v1 < v3 {
 				if v1 > v2 || v2 > v3 {
@@ -166,8 +166,8 @@ func TestValue_V_Modulus(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			v1 := n.V(tc.p1.x, tc.p1.y)
-			v2 := n.V(tc.p2.x, tc.p2.y)
+			v1 := n.Linear(tc.p1.x, tc.p1.y)
+			v2 := n.Linear(tc.p2.x, tc.p2.y)
 
 			if v1 != v2 {
 				t.Fatalf("expected equivalent values (%v:%f) and (%v:%f)",

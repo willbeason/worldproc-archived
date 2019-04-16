@@ -12,6 +12,10 @@ type offset struct {
 	X, Y fixed.F16
 }
 
+var (
+	NoOffset = offset{X: 0, Y: 0}
+)
+
 // Offsets is a set of x and y offsets from the origin.
 type Offsets [maxDepth]offset
 
@@ -24,4 +28,8 @@ func RandomOffsets(src rand.Source) Offsets {
 		result[depth].Y = fixed.F16(src.Int63()).Remainder() * noise.NoiseSize
 	}
 	return result
+}
+
+func Offset(x, y fixed.F16) offset {
+	return offset{X: x, Y: y}
 }

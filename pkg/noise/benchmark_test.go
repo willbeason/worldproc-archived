@@ -14,7 +14,7 @@ var px = randP()
 
 func BenchmarkValue_V(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		n.V(px.x, px.y)
+		n.Linear(px.x, px.y)
 	}
 }
 

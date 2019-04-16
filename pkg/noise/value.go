@@ -14,8 +14,6 @@ type Value struct {
 	noise [size2]fixed.F16
 }
 
-var _ Source = &Value{}
-
 // Fill generates the underlying noise which Value will interpolate.
 //
 // src is the source of randomness to use to generate noise.
@@ -25,11 +23,29 @@ func (v *Value) Fill(src rand.Source) {
 	}
 }
 
-// V implements Source.
+// Nearest returns the noise nearest to (x, y).
+func (v *Value) Nearest(x, y fixed.F16) fixed.F16 {
+	// Take the modulus of the integral parts of each coordinate.
+	// Each measured faster stored rather than recomputed 4 times.
+	xi := x.Int() & intMask
+	if x.Remainder() > fixed.Half16 {
+		// Increment if closer to next.
+		xi = (xi+1)&intMask
+	}
+	yi := int(y >> revShift) & int2Mask
+	if y.Remainder() > fixed.Half16 {
+		// Increment if closer to next.
+		yi = (yi+size)&int2Mask
+	}
+
+	return v.noise[yi+xi]
+}
+
+// Linear linearly interpolates noise.
 //
 // Guarantees monotonic behavior between integral values.
 // Guarantees behavior at (x, y) is equivalent to (x mod size, y mod size)
-func (v *Value) V(x, y fixed.F16) fixed.F32 {
+func (v *Value) Linear(x, y fixed.F16) fixed.F32 {
 	// Take the modulus of the integral parts of each coordinate.
 	// Each measured faster stored rather than recomputed 4 times.
 	xi := x.Int() & intMask

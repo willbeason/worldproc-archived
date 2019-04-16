@@ -3,351 +3,201 @@ package main
 import (
 	"fmt"
 	"image"
-	"image/gif"
+	"image/color"
+	"image/png"
+	"math"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"time"
 
-	"willbeason/worldproc/pkg/color"
+	"willbeason/worldproc/pkg/colors"
 	"willbeason/worldproc/pkg/fixed"
 	"willbeason/worldproc/pkg/lattice"
 	"willbeason/worldproc/pkg/noise"
+	"willbeason/worldproc/pkg/topo"
+	"willbeason/worldproc/pkg/transforms"
 )
 
 const (
-	nFrames  = 102
-	cellSize = 29.89
+	ytCellSize = 130
+	invYtCellSize = 1.0 / ytCellSize
 )
 
 var (
 	blog    = image.Rect(0, 0, 300, 300)
 	youTube = image.Rect(0, 0, 1280, 720)
 
-	sz = blog
-	n  = noise.Value{}
+	sz = youTube
+
+	dir = fmt.Sprintf("C:\\Users\\Will\\Pictures\\WorldProc\\%d", time.Now().Unix())
+
+	src = rand.NewSource(time.Now().UnixNano())
+
+	topography = topo.NoiseTopography{
+		Noise: noise.Value{},
+		Scales: transforms.PowerScales(ytCellSize, 1.0/math.SqrtPhi),
+		Offsets: transforms.RandomOffsets(src),
+		Rotations: transforms.RandomRotations(src),
+		Depth: 1,
+	}
 )
 
-func forPix(rect image.Rectangle, f func(x, y int) uint8) *image.Paletted {
-	img := image.Paletted{
-		Pix:     make([]uint8, rect.Max.X*rect.Max.Y),
-		Stride:  rect.Max.X,
+func forPix(rect image.Rectangle, f func(x, y int) color.Color) *image.NRGBA {
+	img := image.NRGBA{
+		Pix:     make([]uint8, rect.Max.X*rect.Max.Y*4),
+		Stride:  rect.Max.X*4,
 		Rect:    rect,
-		Palette: color.Grayscale(),
 	}
 
 	for x := rect.Min.X; x < rect.Max.X; x++ {
 		for y := rect.Min.Y; y < rect.Max.Y; y++ {
-			img.Pix[x+img.Stride*y] = f(x, y)
+			c := f(x, y)
+			img.Set(x, y, c)
 		}
 	}
 
 	return &img
 }
 
+func blend(img1, img2 *image.NRGBA, p func(x, y int) float64) *image.NRGBA {
+	return forPix(img1.Rect, func(x, y int) color.Color {
+		return colors.Blend(img1.NRGBAAt(x, y), img2.NRGBAAt(x, y), p(x, y))
+	})
+}
+
+func heightToColorIndex(tallest float64) func(height float64) float64 {
+	if tallest == 0.0 {
+		return func(height float64) float64 {
+			return 0.0
+		}
+	}
+
+	tallestInv := 1.0 / tallest
+	deep := 0.50
+	shallow := 0.55
+	sand := 0.56
+	grass := 0.60
+	forest := 0.70
+	deepForest := 0.80
+	stone := 0.90
+	snow := 0.95
+
+	return func(height float64) float64 {
+		f := height * tallestInv
+		switch {
+		case f < deep:
+			return 0.0
+		case f <= shallow:
+			return (f - deep)*(20.0)
+		case f <= sand:
+			return (f - shallow)*(100.0) + 1.0
+		case f <= grass:
+			return (f - sand)*(25.0) + 2.0
+		case f <= forest:
+			return (f - grass)*(10.0) + 3.0
+		case f <= deepForest:
+			return (f - forest)*(10.0) + 4.0
+		case f <= stone:
+			return (f - deepForest)*(10.0) + 5.0
+		case f <= snow:
+			return (f - stone)*(20.0) + 6.0
+		}
+		return 7.0
+	}
+}
+
+func adj(rect image.Rectangle, x, y int) (float64, float64) {
+	return (float64(x-rect.Max.X/2))*invYtCellSize, (float64(y-rect.Max.Y/2))*invYtCellSize
+}
+
 func main() {
-	n.Fill(rand.NewSource(time.Now().UnixNano()))
+	topography.Noise.Fill(src)
+	// topography.Offsets[0] = transforms.Offset(fixed.Float(float64(-sz.Max.X/2)+0.5), fixed.Float(float64(-sz.Max.Y/2)+0.5))
+	topography.Rotations[0] = transforms.NoRotation
 
-	genLattice()
-	genValues()
-	genInterpolate()
-	genYouTube()
-}
-
-func genLattice() {
-	fw, _ := os.OpenFile("C:\\Users\\Will\\Pictures\\WorldProc\\value_noise_1.gif", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
-
-	g := gif.GIF{
-		Image:    make([]*image.Paletted, nFrames),
-		Delay:    make([]int, nFrames),
-		Disposal: make([]byte, nFrames),
-	}
-
-	baseL := lattice.NewLattice(fixed.Float(cellSize * 10))
-	g.Image[0] = forPix(sz, func(x, y int) uint8 {
-		h := baseL.V(fixed.Int(x), fixed.Int(y)).Int()
-		if h == 1 {
-			return 1
-		}
-		return 255
-	})
-	g.Delay[0] = 50
-
-	maxCol := 200
-
-	for frame := 1; frame < 101; frame++ {
-		l := lattice.NewLattice(fixed.Float(cellSize))
-
-		g.Delay[frame] = 4
-		g.Disposal[frame] = gif.DisposalPrevious
-
-		tFrame := frame - 1
-
-		g.Image[frame] = forPix(sz, func(x, y int) uint8 {
-			if baseL.V(fixed.Int(x), fixed.Int(y)).Int() == 1 {
-				return 0
-			}
-
-			val := x*x + y*y
-			maxVal := tFrame * tFrame * 36
-			if val > maxVal {
-				return 0
-			}
-
-			prevVal := (tFrame - 1) * (tFrame - 1) * 36
-
-			pct := float64(maxVal-val) / float64(maxVal-prevVal)
-			if pct > 1.0 {
-				pct = 1.0
-			}
-
-			h := l.V(fixed.Int(x), fixed.Int(y)).Int()
-			if h == 1 {
-				return 255 - uint8(float64(maxCol)*pct)
-			}
-			return 0
-		})
-	}
-
-	g.Image[101] = forPix(sz, func(x, y int) uint8 {
-		return 0
-	})
-	g.Delay[100] = 1000
-	g.Disposal[101] = gif.DisposalPrevious
-
-	err := gif.EncodeAll(fw, &g)
+	err := os.Mkdir(dir, os.ModePerm)
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 
-	_ = fw.Close()
+	topography.Noise.Fill(rand.NewSource(time.Now().UnixNano()))
 
-}
+	nt := topo.NewTopography(sz, func(x, y int) fixed.F32 {
+		return topography.HeightNearest(
+			fixed.Int(x),
+			fixed.Int(y),
+		)
+	})
+	lt := topo.NewTopography(sz, func(x, y int) fixed.F32 {
+		return topography.HeightLinear(
+			fixed.Int(x),
+			fixed.Int(y),
+		)
+	})
 
-func genValues() {
-	fw, _ := os.OpenFile("C:\\Users\\Will\\Pictures\\WorldProc\\value_noise_2.gif", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
+	l := lattice.NewLattice(fixed.Float(ytCellSize))
 
-	g := gif.GIF{
-		Image:    make([]*image.Paletted, nFrames),
-		Delay:    make([]int, nFrames),
-		Disposal: make([]byte, nFrames),
-	}
+	white := forPix(sz, func(x, y int) color.Color {
+		return color.White
+	})
 
-	baseL := lattice.NewLattice(fixed.Float(cellSize))
-	g.Image[0] = forPix(sz, func(x, y int) uint8 {
-		h := baseL.V(fixed.Int(x), fixed.Int(y)).Int()
-		if h == 1 {
-			return 1
+	delay := 20
+
+	centerX := sz.Max.X / 2
+	centerY := sz.Max.Y / 2
+	for frame := 70; frame < 101; frame++ {
+		latticeR := float64((frame - delay) * 20)
+
+		curTop := topo.NewTopography(sz, func(x, y int) fixed.F32 {
+			xp, yp := adj(sz, x, y)
+			xp, yp = math.Floor(xp), math.Floor(yp)
+			r := math.Sqrt(float64(xp*xp + yp*yp))*ytCellSize
+			diff := latticeR - r
+
+			if frame < 70 {
+				factor := diff / 200
+
+				if factor < 0.0 {
+					factor = 0.0
+				} else if factor > 1.0 {
+					factor = 1.0
+				}
+
+				return fixed.Float32(nt.Height(x, y).Float64() * factor)
+			}
+
+			factor := float64(frame - 70) / 30.0
+			return fixed.Float32(nt.Height(x, y).Float64() * (1.0 - factor)) + fixed.Float32(lt.Height(x, y).Float64() * factor)
+		})
+
+		h2c := heightToColorIndex(1.0)
+
+		curCol := forPix(sz, func(x, y int) color.Color {
+			return colors.TopoScale.At(h2c(curTop.Height(x, y).Float64()))
+		})
+
+		img := blend(curCol, white, func(x, y int) float64 {
+			xp, yp := adj(sz, x, y)
+			r := math.Sqrt(xp*xp + yp*yp)*ytCellSize
+			diff := (r - latticeR) / 50
+
+			d := l.Dist(x-centerX, y-centerY).Float64()
+			return math.Exp(-2000 * d * d - diff * diff) / 2.0
+		})
+
+		fw, err := os.OpenFile(filepath.Join(dir, fmt.Sprintf("out-%03d.png", frame)), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, os.ModePerm)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
 		}
-		return 255
-	})
-	g.Delay[0] = 50
-
-	for frame := 1; frame < 101; frame++ {
-
-		g.Delay[frame] = 4
-		g.Disposal[frame] = gif.DisposalPrevious
-
-		tFrame := frame - 1
-
-		g.Image[frame] = forPix(sz, func(x, y int) uint8 {
-			if baseL.V(fixed.Int(x), fixed.Int(y)).Int() == 1 {
-				// Never overwrite grid.
-				return 0
-			}
-
-			val := n.V(fixed.Int(int(float64(x)/cellSize)), fixed.Int(int(float64(y)/cellSize)))
-
-			f := 1.0 - (1.0-val.Float64())*float64(tFrame)/100.0
-			p := uint8(f * 255)
-			if p == 0 {
-				p = 1
-			}
-			return uint8(p)
-		})
-	}
-
-	g.Image[101] = forPix(sz, func(x, y int) uint8 {
-		return 0
-	})
-	g.Delay[100] = 1000
-	g.Disposal[101] = gif.DisposalPrevious
-
-	err := gif.EncodeAll(fw, &g)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	_ = fw.Close()
-
-}
-
-func genInterpolate() {
-	fw, _ := os.OpenFile("C:\\Users\\Will\\Pictures\\WorldProc\\value_noise_3.gif", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
-
-	g := gif.GIF{
-		Image:    make([]*image.Paletted, nFrames-50),
-		Delay:    make([]int, nFrames-50),
-		Disposal: make([]byte, nFrames-50),
-	}
-
-	baseL := lattice.NewLattice(fixed.Float(cellSize))
-	g.Image[0] = forPix(sz, func(x, y int) uint8 {
-		var f float64
-		if baseL.V(fixed.Int(x), fixed.Int(y)).Int() == 0 {
-			// Slowly overwrite grid.
-			f = n.V(fixed.Int(int(float64(x)/cellSize)), fixed.Int(int(float64(y)/cellSize))).Float64()
+		err = png.Encode(fw, img)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
 		}
-
-		p := uint8(f * 255)
-		if p == 0 {
-			p = 1
-		}
-		return p
-	})
-	g.Delay[0] = 100
-
-	for frame := 1; frame < 51; frame++ {
-
-		g.Delay[frame] = 4
-		g.Disposal[frame] = gif.DisposalPrevious
-
-		tFrame := frame - 1
-
-		g.Image[frame] = forPix(sz, func(x, y int) uint8 {
-			var approx float64
-			if baseL.V(fixed.Int(x), fixed.Int(y)).Int() == 0 {
-				// Slowly overwrite grid.
-				approx = n.V(fixed.Int(int(float64(x)/cellSize)), fixed.Int(int(float64(y)/cellSize))).Float64()
-			}
-			val := n.V(fixed.Float(float64(x)/cellSize)-fixed.Float(0.5), fixed.Float(float64(y)/cellSize)-fixed.Float(0.5)).Float64()
-
-			f := approx*(1.0-(float64(tFrame)/50.0)) + val*(float64(tFrame)/50.0)
-			p := uint8(f * 255)
-			if p == 0 {
-				p = 1
-			}
-			return p
-		})
 	}
-
-	g.Image[51] = forPix(sz, func(x, y int) uint8 {
-		return 0
-	})
-	g.Delay[50] = 500
-	g.Disposal[51] = gif.DisposalPrevious
-
-	err := gif.EncodeAll(fw, &g)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	_ = fw.Close()
-
 }
 
-func genYouTube() {
-	fw, _ := os.OpenFile("C:\\Users\\Will\\Pictures\\WorldProc\\value_noise_you_tube.gif", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
 
-	g := gif.GIF{
-		Image:    make([]*image.Paletted, 500),
-		Delay:    make([]int, 500),
-		Disposal: make([]byte, 500),
-	}
-
-	ytCellSize := 39.9444
-	baseL := lattice.NewLattice(fixed.Float(ytCellSize))
-	g.Image[0] = forPix(youTube, func(x, y int) uint8 {
-		return 255
-	})
-	g.Delay[0] = 5
-
-	for frame := 1; frame < 101; frame++ {
-		g.Delay[frame] = 5
-		g.Disposal[frame] = gif.DisposalPrevious
-
-		tFrame := frame - 1
-		g.Image[frame] = forPix(youTube, func(x, y int) uint8 {
-			val := x*x + y*y
-			maxVal := tFrame * tFrame * 288
-			if val > maxVal {
-				return 0
-			}
-			prevVal := (tFrame - 1) * (tFrame - 1) * 288
-
-			pct := float64(maxVal-val) / float64(maxVal-prevVal)
-			if pct > 1.0 {
-				pct = 1.0
-			}
-			h := baseL.V(fixed.Int(x), fixed.Int(y)).Int()
-			if h == 1 {
-				return 255 - uint8(float64(254)*pct)
-			}
-			return 0
-		})
-	}
-
-	for frame := 101; frame < 201; frame++ {
-		g.Delay[frame] = 5
-		g.Disposal[frame] = gif.DisposalPrevious
-
-		tFrame := frame - 101
-		g.Image[frame] = forPix(youTube, func(x, y int) uint8 {
-			if baseL.V(fixed.Int(x), fixed.Int(y)).Int() == 1 {
-				// Never overwrite grid.
-				return 1
-			}
-
-			val := n.V(fixed.Int(int(float64(x)/ytCellSize)), fixed.Int(int(float64(y)/ytCellSize)))
-
-			f := 1.0 - (1.0-val.Float64())*float64(tFrame)/100.0
-			p := uint8(f * 255)
-			if p == 0 {
-				p = 1
-			}
-			return uint8(p)
-		})
-	}
-
-	for frame := 201; frame < 301; frame++ {
-		g.Delay[frame] = 5
-		g.Disposal[frame] = gif.DisposalPrevious
-
-		tFrame := frame - 201
-		g.Image[frame] = forPix(youTube, func(x, y int) uint8 {
-			var approx float64
-			if baseL.V(fixed.Int(x), fixed.Int(y)).Int() == 0 {
-				// Slowly overwrite grid.
-				approx = n.V(fixed.Int(int(float64(x)/ytCellSize)), fixed.Int(int(float64(y)/ytCellSize))).Float64()
-			}
-			val := n.V(fixed.Float(float64(x)/ytCellSize)-fixed.Float(0.5), fixed.Float(float64(y)/ytCellSize)-fixed.Float(0.5)).Float64()
-
-			f := approx*(1.0-(float64(tFrame)/100.0)) + val*(float64(tFrame)/100.0)
-			p := uint8(f * 255)
-			if p == 0 {
-				p = 1
-			}
-			return p
-		})
-	}
-
-	for frame := 301; frame < 500; frame++ {
-		g.Delay[frame] = 5
-		g.Disposal[frame] = gif.DisposalPrevious
-		g.Image[frame] = forPix(youTube, func(x, y int) uint8 {
-			f := n.V(fixed.Float(float64(x)/ytCellSize)-fixed.Float(0.5), fixed.Float(float64(y)/ytCellSize)-fixed.Float(0.5)).Float64()
-			p := uint8(f * 255)
-			if p == 0 {
-				p = 1
-			}
-			return p
-		})
-	}
-
-	err := gif.EncodeAll(fw, &g)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	_ = fw.Close()
-
-}

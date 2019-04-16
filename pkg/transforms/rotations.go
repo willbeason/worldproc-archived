@@ -11,6 +11,10 @@ type rotation struct {
 	Sin, Cos fixed.F16
 }
 
+var (
+	NoRotation = rotation{Sin: fixed.One16, Cos: fixed.F16(0)}
+)
+
 // Rotations is the sine and cosine of rotations about the origin.
 type Rotations [maxDepth]rotation
 
