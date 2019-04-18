@@ -108,12 +108,12 @@ func heightToColorIndex(tallest float64) func(height float64) float64 {
 }
 
 func adj(rect image.Rectangle, x, y int) (float64, float64) {
-	return (float64(x-rect.Max.X/2))*invYtCellSize, (float64(y-rect.Max.Y/2))*invYtCellSize
+	return float64(x-rect.Max.X/2)*invYtCellSize, float64(y-rect.Max.Y/2)*invYtCellSize
 }
 
 func main() {
 	topography.Noise.Fill(src)
-	// topography.Offsets[0] = transforms.Offset(fixed.Float(float64(-sz.Max.X/2)+0.5), fixed.Float(float64(-sz.Max.Y/2)+0.5))
+	topography.Offsets[0] = transforms.Offset(fixed.Float(float64(-sz.Max.X/2)*invYtCellSize), fixed.Float(float64(-sz.Max.Y/2)*invYtCellSize))
 	topography.Rotations[0] = transforms.NoRotation
 
 	err := os.Mkdir(dir, os.ModePerm)
@@ -147,17 +147,17 @@ func main() {
 
 	centerX := sz.Max.X / 2
 	centerY := sz.Max.Y / 2
-	for frame := 70; frame < 101; frame++ {
+	for frame := 0; frame < 101; frame++ {
 		latticeR := float64((frame - delay) * 20)
 
 		curTop := topo.NewTopography(sz, func(x, y int) fixed.F32 {
 			xp, yp := adj(sz, x, y)
-			xp, yp = math.Floor(xp), math.Floor(yp)
+			xp, yp = math.Round(xp), math.Round(yp)
 			r := math.Sqrt(float64(xp*xp + yp*yp))*ytCellSize
 			diff := latticeR - r
 
 			if frame < 70 {
-				factor := diff / 200
+				factor := (diff + 200) / 400
 
 				if factor < 0.0 {
 					factor = 0.0
@@ -183,7 +183,7 @@ func main() {
 			r := math.Sqrt(xp*xp + yp*yp)*ytCellSize
 			diff := (r - latticeR) / 50
 
-			d := l.Dist(x-centerX, y-centerY).Float64()
+			d := l.Dist(x-centerX+ytCellSize/2, y-centerY+ytCellSize/2).Float64()
 			return math.Exp(-2000 * d * d - diff * diff) / 2.0
 		})
 
