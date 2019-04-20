@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"willbeason/worldproc/pkg/topo"
 	"willbeason/worldproc/pkg/fixed"
+	"willbeason/worldproc/pkg/topo"
 	"willbeason/worldproc/pkg/transforms"
 )
 

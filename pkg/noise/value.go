@@ -71,7 +71,7 @@ func (v *Value) Linear(x, y fixed.F16) fixed.F32 {
 	// 2) not store the value.
 	xryr := xr.Times(yr).F16()
 	return xryr.Times(vUpperRight) +
-			(yr - xryr).Times(vUpperLeft) +
-			(xr - xryr).Times(vBottomRight) +
-			(fixed.One16 + xryr - xr - yr).Times(vBottomLeft)
+		(yr - xryr).Times(vUpperLeft) +
+		(xr - xryr).Times(vBottomRight) +
+		(fixed.One16 + xryr - xr - yr).Times(vBottomLeft)
 }

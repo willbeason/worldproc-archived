@@ -2,7 +2,6 @@ package transforms
 
 import (
 	"math/rand"
-	"willbeason"
 
 	"willbeason/proctexture/pkg/noise"
 
