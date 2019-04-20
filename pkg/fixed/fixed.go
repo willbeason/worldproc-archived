@@ -7,7 +7,7 @@ const (
 	size32 = 32
 
 	// One16 is the value 1 for use as a compile-time constant.
-	One16 = F16(1 << size16)
+	One16  = F16(1 << size16)
 	Half16 = One16 >> 1
 	Zero16 = F16(0)
 

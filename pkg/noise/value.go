@@ -30,12 +30,12 @@ func (v *Value) Nearest(x, y fixed.F16) fixed.F16 {
 	xi := x.Int() & intMask
 	if x.Remainder() > fixed.Half16 {
 		// Increment if closer to next.
-		xi = (xi+1)&intMask
+		xi = (xi + 1) & intMask
 	}
-	yi := int(y >> revShift) & int2Mask
+	yi := int(y>>revShift) & int2Mask
 	if y.Remainder() > fixed.Half16 {
 		// Increment if closer to next.
-		yi = (yi+size)&int2Mask
+		yi = (yi + size) & int2Mask
 	}
 
 	return v.noise[yi+xi]
@@ -49,7 +49,7 @@ func (v *Value) Linear(x, y fixed.F16) fixed.F32 {
 	// Take the modulus of the integral parts of each coordinate.
 	// Each measured faster stored rather than recomputed 4 times.
 	xi := x.Int() & intMask
-	yi := int(y >> revShift) & int2Mask
+	yi := int(y>>revShift) & int2Mask
 
 	// Get the value at each corner surrounding the position.
 	// The compiler optimizes away these assignments; this is for readability.
@@ -71,7 +71,7 @@ func (v *Value) Linear(x, y fixed.F16) fixed.F32 {
 	// 2) not store the value.
 	xryr := xr.Times(yr).F16()
 	return xryr.Times(vUpperRight) +
-		(yr - xryr).Times(vUpperLeft) +
-		(xr - xryr).Times(vBottomRight) +
-		(fixed.One16 + xryr - xr - yr).Times(vBottomLeft)
+			(yr - xryr).Times(vUpperLeft) +
+			(xr - xryr).Times(vBottomRight) +
+			(fixed.One16 + xryr - xr - yr).Times(vBottomLeft)
 }

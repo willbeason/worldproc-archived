@@ -27,7 +27,7 @@ func (t *NoiseTopography) HeightLinear(x, y fixed.F16) fixed.F32 {
 		// Scale
 		xt, yt := x.Times(t.Scales[depth].Frequency).F16(), y.Times(t.Scales[depth].Frequency).F16()
 		// offset
-		xt, yt = xt + t.Offsets[depth].X, yt + t.Offsets[depth].Y
+		xt, yt = xt+t.Offsets[depth].X, yt+t.Offsets[depth].Y
 		// Rotate and scale.
 		// Measured faster to inline rotation.
 		height += t.Noise.Linear((xt.Times(t.Rotations[depth].Cos) + yt.Times(t.Rotations[depth].Sin)).F16(), (yt.Times(t.Rotations[depth].Cos) - xt.Times(t.Rotations[depth].Sin)).F16()).F16().Times(t.Scales[depth].Amplitude)
@@ -43,7 +43,7 @@ func (t *NoiseTopography) HeightNearest(x, y fixed.F16) fixed.F32 {
 		// Scale
 		xt, yt := x.Times(t.Scales[depth].Frequency).F16(), y.Times(t.Scales[depth].Frequency).F16()
 		// offset
-		xt, yt = xt + t.Offsets[depth].X, yt + t.Offsets[depth].Y
+		xt, yt = xt+t.Offsets[depth].X, yt+t.Offsets[depth].Y
 		// Rotate and scale.
 		// Measured faster to inline rotation.
 		height += t.Noise.Nearest((xt.Times(t.Rotations[depth].Cos) + yt.Times(t.Rotations[depth].Sin)).F16(), (yt.Times(t.Rotations[depth].Cos) - xt.Times(t.Rotations[depth].Sin)).F16()).Times(t.Scales[depth].Amplitude)

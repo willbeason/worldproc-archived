@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"willbeason/worldproc/pkg/fixed"
 	"willbeason/worldproc/pkg/topo"
+	"willbeason/worldproc/pkg/fixed"
 	"willbeason/worldproc/pkg/transforms"
 )
 
@@ -15,7 +15,7 @@ var (
 	src = rand.NewSource(time.Now().UnixNano())
 
 	t = topo.NoiseTopography{
-		Scales:    transforms.PowerScales(1000, 1.0 / math.Phi),
+		Scales:    transforms.PowerScales(1000, 1.0/math.Phi),
 		Offsets:   transforms.RandomOffsets(src),
 		Rotations: transforms.RandomRotations(src),
 		Depth:     24,

@@ -12,7 +12,7 @@ const (
 
 	// revShift is a compile-time constant representing the number of bits to shift y from to
 	// get it into the correct index position.
-	revShift = 16-shift
+	revShift = 16 - shift
 
 	// size is the scale of noise in units (for certain implementations) before it repeats.
 	// We have it as a compile-time constant so types can use it as array lengths.

@@ -26,7 +26,7 @@ func main() {
 	src := rand.NewSource(time.Now().UnixNano())
 
 	t := topo.NoiseTopography{
-		Scales:    transforms.PowerScales(200, 1.0 / math.SqrtPhi),
+		Scales:    transforms.PowerScales(200, 1.0/math.SqrtPhi),
 		Offsets:   transforms.RandomOffsets(src),
 		Rotations: transforms.RandomRotations(src),
 		Depth:     20,
@@ -48,9 +48,8 @@ func main() {
 		}
 	}
 
-	fw, _ := os.OpenFile("C:\\Users\\Will\\Pictures\\WorldProc\\img.png", os.O_CREATE | os.O_WRONLY, os.ModePerm)
+	fw, _ := os.OpenFile("C:\\Users\\Will\\Pictures\\WorldProc\\img.png", os.O_CREATE|os.O_WRONLY, os.ModePerm)
 
 	_ = png.Encode(fw, img)
-
 
 }

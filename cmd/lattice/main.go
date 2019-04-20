@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	ytCellSize = 130
+	ytCellSize    = 130
 	invYtCellSize = 1.0 / ytCellSize
 )
 
@@ -35,19 +35,19 @@ var (
 	src = rand.NewSource(time.Now().UnixNano())
 
 	topography = topo.NoiseTopography{
-		Noise: noise.Value{},
-		Scales: transforms.PowerScales(ytCellSize, 1.0/math.SqrtPhi),
-		Offsets: transforms.RandomOffsets(src),
+		Noise:     noise.Value{},
+		Scales:    transforms.PowerScales(ytCellSize, 1.0/math.SqrtPhi),
+		Offsets:   transforms.RandomOffsets(src),
 		Rotations: transforms.RandomRotations(src),
-		Depth: 1,
+		Depth:     1,
 	}
 )
 
 func forPix(rect image.Rectangle, f func(x, y int) color.Color) *image.NRGBA {
 	img := image.NRGBA{
-		Pix:     make([]uint8, rect.Max.X*rect.Max.Y*4),
-		Stride:  rect.Max.X*4,
-		Rect:    rect,
+		Pix:    make([]uint8, rect.Max.X*rect.Max.Y*4),
+		Stride: rect.Max.X * 4,
+		Rect:   rect,
 	}
 
 	for x := rect.Min.X; x < rect.Max.X; x++ {
@@ -89,26 +89,26 @@ func heightToColorIndex(tallest float64) func(height float64) float64 {
 		case f < deep:
 			return 0.0
 		case f <= shallow:
-			return (f - deep)*(20.0)
+			return (f - deep) * (20.0)
 		case f <= sand:
-			return (f - shallow)*(100.0) + 1.0
+			return (f-shallow)*(100.0) + 1.0
 		case f <= grass:
-			return (f - sand)*(25.0) + 2.0
+			return (f-sand)*(25.0) + 2.0
 		case f <= forest:
-			return (f - grass)*(10.0) + 3.0
+			return (f-grass)*(10.0) + 3.0
 		case f <= deepForest:
-			return (f - forest)*(10.0) + 4.0
+			return (f-forest)*(10.0) + 4.0
 		case f <= stone:
-			return (f - deepForest)*(10.0) + 5.0
+			return (f-deepForest)*(10.0) + 5.0
 		case f <= snow:
-			return (f - stone)*(20.0) + 6.0
+			return (f-stone)*(20.0) + 6.0
 		}
 		return 7.0
 	}
 }
 
 func adj(rect image.Rectangle, x, y int) (float64, float64) {
-	return float64(x-rect.Max.X/2)*invYtCellSize, float64(y-rect.Max.Y/2)*invYtCellSize
+	return float64(x-rect.Max.X/2) * invYtCellSize, float64(y-rect.Max.Y/2) * invYtCellSize
 }
 
 func main() {
@@ -153,7 +153,7 @@ func main() {
 		curTop := topo.NewTopography(sz, func(x, y int) fixed.F32 {
 			xp, yp := adj(sz, x, y)
 			xp, yp = math.Round(xp), math.Round(yp)
-			r := math.Sqrt(float64(xp*xp + yp*yp))*ytCellSize
+			r := math.Sqrt(float64(xp*xp+yp*yp)) * ytCellSize
 			diff := latticeR - r
 
 			if frame < 70 {
@@ -168,8 +168,8 @@ func main() {
 				return fixed.Float32(nt.Height(x, y).Float64() * factor)
 			}
 
-			factor := float64(frame - 70) / 30.0
-			return fixed.Float32(nt.Height(x, y).Float64() * (1.0 - factor)) + fixed.Float32(lt.Height(x, y).Float64() * factor)
+			factor := float64(frame-70) / 30.0
+			return fixed.Float32(nt.Height(x, y).Float64()*(1.0-factor)) + fixed.Float32(lt.Height(x, y).Float64()*factor)
 		})
 
 		h2c := heightToColorIndex(1.0)
@@ -180,11 +180,11 @@ func main() {
 
 		img := blend(curCol, white, func(x, y int) float64 {
 			xp, yp := adj(sz, x, y)
-			r := math.Sqrt(xp*xp + yp*yp)*ytCellSize
+			r := math.Sqrt(xp*xp+yp*yp) * ytCellSize
 			diff := (r - latticeR) / 50
 
 			d := l.Dist(x-centerX+ytCellSize/2, y-centerY+ytCellSize/2).Float64()
-			return math.Exp(-2000 * d * d - diff * diff) / 2.0
+			return math.Exp(-2000*d*d-diff*diff) / 2.0
 		})
 
 		fw, err := os.OpenFile(filepath.Join(dir, fmt.Sprintf("out-%03d.png", frame)), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, os.ModePerm)
@@ -199,5 +199,3 @@ func main() {
 		}
 	}
 }
-
-

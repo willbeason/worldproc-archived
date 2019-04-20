@@ -19,7 +19,7 @@ func BenchmarkValue_V(b *testing.B) {
 }
 
 var (
-	n2 = Value{}
+	n2  = Value{}
 	src = rand.NewSource(time.Now().UnixNano())
 )
 
